@@ -21,7 +21,9 @@ const addSubscriber = async (req, res) => {
   try {
     const { email } = req.body;
     const subscriber = await Subscriber.findOne({
-      email,
+      where: {
+        email,
+      },
     });
     if (subscriber) {
       res.status(403).json({
