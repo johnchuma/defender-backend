@@ -6,7 +6,7 @@ const SubscriberRoutes = require("./modules/subscribers/subscribers.routes");
 const BlogsRoutes = require("./modules/blogs/blogs.routes");
 const InquiryRoutes = require("./modules/inquiries/inquiries.routes");
 
-app.use(express.static("/files"));
+app.use("/files", express.static("files"));
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.text({ type: "text/plain" }));
