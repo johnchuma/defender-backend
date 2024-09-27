@@ -37,8 +37,35 @@ const addBlog = async (req, res) => {
 };
 const getBlogs = async (req, res) => {
   try {
-    const blog = await Blog.findAll();
-    successResponse(res, blog);
+    const { category } = req.query;
+    let options = {};
+    if (category) {
+      options.category = category;
+    }
+    const response = await Blog.findAndCountAll({
+      limit: req.limit,
+      order: [["createdAt", "DESC"]],
+      offset: req.offset,
+      where: options,
+    });
+    successResponse(res, {
+      count: response.count,
+      page: req.page,
+      blogs: response.rows,
+    });
+  } catch (error) {
+    errorResponse(res, error);
+  }
+};
+const getFeaturedBlogs = async (req, res) => {
+  try {
+    const response = await Blog.findAll({
+      where: {
+        isFeatured: true,
+      },
+      limit: 3,
+    });
+    successResponse(res, response);
   } catch (error) {
     errorResponse(res, error);
   }
@@ -80,6 +107,7 @@ module.exports = {
   findBlogByUUID,
   getBlogs,
   getBlog,
+  getFeaturedBlogs,
   deleteBlog,
   updateBlog,
 };

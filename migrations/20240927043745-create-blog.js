@@ -37,6 +37,10 @@ module.exports = {
         allowNull: false,
         type: DataTypes.DATE,
       },
+      isFeatured: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     });
   },
   async down(queryInterface, DataTypes) {
