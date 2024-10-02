@@ -20,7 +20,6 @@ module.exports = {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
       },
       subject: {
         type: DataTypes.STRING,
