@@ -167,6 +167,7 @@ const getMyInfo = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const deleteUser = async (req, res) => {
   try {
     const { uuid } = req.params;
@@ -177,6 +178,7 @@ const deleteUser = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const resetPassword = async (req, res) => {
   try {
     let { recoveryCode, password } = req.body;
@@ -203,6 +205,7 @@ const resetPassword = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const updateUser = async (req, res) => {
   try {
     const { uuid } = req.params;

@@ -5,6 +5,19 @@ const internalError = (error) => {
     error: error,
   });
 };
+const orderStages = [
+  "Order Placement",
+  "Order Confirmation",
+  "Order Processing",
+  "Order Packaging",
+  "Shipping",
+  "In Transit",
+  "Out for Delivery",
+  "Order Delivery",
+  "Delivery Confirmation",
+  "Return or Exchange",
+];
+
 const monthsNames = [
   "Jan",
   "Feb",
@@ -27,6 +40,6 @@ const successResponse = (data) => {
 };
 module.exports = {
   internalError,
-  monthsNames,
+  orderStages,
   successResponse,
 };

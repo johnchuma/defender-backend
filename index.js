@@ -6,6 +6,8 @@ const SubscriberRoutes = require("./modules/subscribers/subscribers.routes");
 const BlogsRoutes = require("./modules/blogs/blogs.routes");
 const InquiryRoutes = require("./modules/inquiries/inquiries.routes");
 const UserRoutes = require("./modules/users/users.routes");
+const ReportRoutes = require("./modules/inquiries/inquiries.routes");
+const OrderRoutes = require("./modules/orders/orders.routes");
 
 app.use("/files", express.static("files"));
 app.use(express.json());
@@ -14,6 +16,7 @@ app.use(bodyParser.text({ type: "text/plain" }));
 
 app.use("/inquiries", InquiryRoutes);
 app.use("/users", UserRoutes);
+app.use("/orders", OrderRoutes);
 app.use("/blogs", BlogsRoutes);
 app.use("/subscribers", SubscriberRoutes);
 
