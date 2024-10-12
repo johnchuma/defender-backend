@@ -1,5 +1,11 @@
 const { Op } = require("sequelize");
-const { Order, OrderProduct, OrderTracking, User } = require("../../models");
+const {
+  Order,
+  OrderProduct,
+  OrderTracking,
+  User,
+  Sequelize,
+} = require("../../models");
 const { errorResponse, successResponse } = require("../../utils/responses");
 const { findUserByUUID } = require("../users/users.controllers");
 const { orderStages } = require("../../utils/constants");
@@ -65,6 +71,7 @@ const addOrder = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const getActiveOrders = async (req, res) => {
   try {
     const response = await Order.findAndCountAll({
@@ -81,6 +88,9 @@ const getActiveOrders = async (req, res) => {
           },
         },
       ],
+      attributes: {
+        exclude: ["userId", "UserId"],
+      },
       where: {
         isActive: true,
       },
@@ -94,6 +104,7 @@ const getActiveOrders = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const getPreviousOrders = async (req, res) => {
   try {
     const response = await Order.findAndCountAll({
@@ -123,26 +134,128 @@ const getPreviousOrders = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const getUserOrders = async (req, res) => {
   try {
     const { uuid } = req.params;
+    const user = await findUserByUUID(uuid);
     const response = await Order.findAll({
       order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: User,
-          where: {
-            uuid,
-          },
-        },
-      ],
+      where: {
+        userId: user.id,
+      },
+      include: [OrderProduct, OrderTracking],
+    });
+    const newData = response.map((item) => {
+      let count = item.OrderProducts.length;
+      let sum = item.OrderProducts.reduce(
+        (prev, item) => item.price * item.count + prev,
+        0
+      );
+      return {
+        uuid: item.uuid,
+        totalPrice: sum,
+        itemCount: count,
+        orderNo: item.id,
+        orderedAt: item.createdAt,
+        paymentStatus: "Completed",
+        deliverStatus: item.OrderTrackings.length
+          ? item.OrderTrackings[item.OrderTrackings.length - 1].stage
+          : "Unknown",
+      };
     });
 
-    successResponse(res, response);
+    successResponse(res, newData);
   } catch (error) {
     errorResponse(res, error);
   }
 };
+const getUserPendingOrders = async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const user = await findUserByUUID(uuid);
+    const response = await Order.findAll({
+      order: [["createdAt", "DESC"]],
+
+      where: {
+        [Op.and]: [
+          {
+            userId: user.id,
+          },
+          {
+            isActive: true,
+          },
+        ],
+      },
+      include: [OrderProduct, OrderTracking],
+    });
+    const newData = response.map((item) => {
+      let count = item.OrderProducts.length;
+      let sum = item.OrderProducts.reduce(
+        (prev, item) => item.price * item.count + prev,
+        0
+      );
+      return {
+        uuid: item.uuid,
+        totalPrice: sum,
+        itemCount: count,
+        orderNo: item.id,
+        orderedAt: item.createdAt,
+        paymentStatus: "Completed",
+        deliverStatus: item.OrderTrackings.length
+          ? item.OrderTrackings[item.OrderTrackings.length - 1].stage
+          : "Unknown",
+      };
+    });
+
+    successResponse(res, newData);
+  } catch (error) {
+    errorResponse(res, error);
+  }
+};
+const getUserDeliveredOrders = async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const user = await findUserByUUID(uuid);
+    const response = await Order.findAll({
+      order: [["createdAt", "DESC"]],
+      where: {
+        [Op.and]: [
+          {
+            userId: user.id,
+          },
+          {
+            isActive: false,
+          },
+        ],
+      },
+      include: [OrderProduct, OrderTracking],
+    });
+    const newData = response.map((item) => {
+      let count = item.OrderProducts.length;
+      let sum = item.OrderProducts.reduce(
+        (prev, item) => item.price * item.count + prev,
+        0
+      );
+      return {
+        uuid: item.uuid,
+        totalPrice: sum,
+        itemCount: count,
+        orderNo: item.id,
+        orderedAt: item.createdAt,
+        paymentStatus: "Completed",
+        deliverStatus: item.OrderTrackings.length
+          ? item.OrderTrackings[item.OrderTrackings.length - 1].stage
+          : "Unknown",
+      };
+    });
+
+    successResponse(res, newData);
+  } catch (error) {
+    errorResponse(res, error);
+  }
+};
+
 const getOrder = async (req, res) => {
   try {
     const { uuid } = req.params;
@@ -150,7 +263,20 @@ const getOrder = async (req, res) => {
       where: {
         uuid,
       },
-      include: [User, OrderProduct, OrderTracking],
+      attributes: {
+        exclude: ["userId"],
+      },
+      include: [
+        {
+          model: User,
+        },
+        {
+          model: OrderProduct,
+        },
+        {
+          model: OrderTracking,
+        },
+      ],
     });
     successResponse(res, order);
   } catch (error) {
@@ -168,6 +294,7 @@ const deleteOrder = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 const updateOrder = async (req, res) => {
   try {
     const { uuid } = req.params;
@@ -180,10 +307,13 @@ const updateOrder = async (req, res) => {
     errorResponse(res, error);
   }
 };
+
 module.exports = {
   addOrder,
   findOrderByUUID,
   getActiveOrders,
+  getUserPendingOrders,
+  getUserDeliveredOrders,
   getPreviousOrders,
   getUserOrders,
   getOrder,
