@@ -3,7 +3,6 @@ const {
   Order,
   OrderProduct,
   OrderTracking,
-  Product,
   User,
   Sequelize,
 } = require("../../models");
@@ -273,9 +272,6 @@ const getOrder = async (req, res) => {
         },
         {
           model: OrderProduct,
-          include: {
-            model: Product,
-          },
         },
         {
           model: OrderTracking,
