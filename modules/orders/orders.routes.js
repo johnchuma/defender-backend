@@ -11,17 +11,18 @@ const {
   getUserDeliveredOrders,
 } = require("./orders.controllers");
 const { getPagination } = require("../../utils/getPagination");
+const { validateJWT } = require("../../utils/validateJWT");
 
 const router = Router();
 
-router.post("/", addOrder);
-router.get("/user/:uuid", getUserOrders);
-router.get("/pending/user/:uuid", getUserPendingOrders);
-router.get("/delivered/user/:uuid", getUserDeliveredOrders);
+router.post("/", validateJWT, addOrder);
+router.get("/user/:uuid", validateJWT, getUserOrders);
+router.get("/pending/user/:uuid", validateJWT, getUserPendingOrders);
+router.get("/delivered/user/:uuid", validateJWT, getUserDeliveredOrders);
 router.get("/active", getPagination, getActiveOrders);
 router.get("/previous", getPagination, getPreviousOrders);
-router.get("/:uuid", getOrder);
-router.patch("/:uuid", updateOrder);
-router.delete("/:uuid", deleteOrder);
+router.get("/:uuid", validateJWT, getOrder);
+router.patch("/:uuid", validateJWT, updateOrder);
+router.delete("/:uuid", validateJWT, deleteOrder);
 
 module.exports = router;
