@@ -26,16 +26,9 @@ const findOrderByUUID = async (uuid) => {
 
 const addOrder = async (req, res) => {
   try {
-    const {
-      withDelivery,
-      country,
-      region,
-      district,
-      address,
-      user_uuid,
-      products,
-    } = req.body;
-    const user = await findUserByUUID(user_uuid);
+    const { withDelivery, country, region, district, address, products } =
+      req.body;
+    const user = req.user;
     const order = await Order.create({
       withDelivery,
       country,
